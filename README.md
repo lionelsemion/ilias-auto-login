@@ -32,11 +32,11 @@ In `about:addons` → this extension → Permissions, make sure access to `ilias
 
 The add-on is signed by Mozilla as an **unlisted** add-on (not listed on addons.mozilla.org) and distributed from this repo. Installed copies read [`updates.json`](updates.json) through the manifest's `update_url` to find new versions.
 
-1. Get an API key at <https://addons.mozilla.org/developers/addon/api/key/>.
+1. Once: get an API key at <https://addons.mozilla.org/developers/addon/api/key/>, copy `example.env` to `.env` and fill in `AMO_JWT_ISSUER` and `AMO_JWT_SECRET`. `.env` is git-ignored.
 2. Raise `"version"` in `extension/manifest.json`.
 3. Run:
    ```sh
-   AMO_JWT_ISSUER='user:…' AMO_JWT_SECRET='…' ./sign.py
+   ./sign.py
    ```
    It builds the zip, gets it signed by AMO, and saves `dist/ilias-stay-signed-in-<version>.xpi`. It then adds the version to `updates.json`, commits and pushes, and creates the GitHub release `v<version>` with the `.xpi` attached. Use `--no-publish` to only sign.
 

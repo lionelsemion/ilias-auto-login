@@ -3,9 +3,11 @@
 publish it as a GitHub release that installed copies auto-update from.
 
 Usage:
-    AMO_JWT_ISSUER=user:123:456 AMO_JWT_SECRET=... ./sign.py [--no-publish]
+    cp example.env .env   # once, then fill in AMO_JWT_ISSUER and AMO_JWT_SECRET
+    ./sign.py [--no-publish]
 
 Get the key/secret at https://addons.mozilla.org/developers/addon/api/key/
+Variables already set in the environment take precedence over .env.
 Each run needs a new "version" in extension/manifest.json. Steps:
   1. upload to AMO, wait for signing, save dist/ilias-stay-signed-in-<version>.xpi
   2. add the version to updates.json, commit, push  (skipped with --no-publish)
@@ -29,6 +31,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 ZIP = os.path.join(ROOT, "ilias-stay-signed-in.zip")
 DIST = os.path.join(ROOT, "dist")
 UPDATES = os.path.join(ROOT, "updates.json")
+ENV_FILE = os.path.join(ROOT, ".env")
 REPO = "lionelsemion/ilias-auto-login"
 
 
@@ -89,7 +92,27 @@ def wait(fetch, done, what, timeout=900):
         time.sleep(10)
 
 
+def load_env(path):
+    """Read KEY=VALUE lines from a .env file into os.environ (existing variables win)."""
+    if not os.path.exists(path):
+        return
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key = key.strip()
+            if key.startswith("export "):
+                key = key[len("export "):].strip()
+            value = value.strip()
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in "'\"":
+                value = value[1:-1]
+            os.environ.setdefault(key, value)
+
+
 def main():
+    load_env(ENV_FILE)
     issuer, secret = os.environ.get("AMO_JWT_ISSUER"), os.environ.get("AMO_JWT_SECRET")
     if not issuer or not secret:
         sys.exit(__doc__)
