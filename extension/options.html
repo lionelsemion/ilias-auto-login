@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ILIAS Stay Signed In</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font: 13px system-ui, sans-serif; margin: 0; padding: 12px 14px; min-width: 300px; max-width: 420px; }
+    h1 { font-size: 14px; margin: 0 0 8px; }
+    .status { padding: 8px; border-radius: 6px; background: rgba(127,127,127,.12); margin-bottom: 10px; line-height: 1.5; }
+    .ok { color: #2e7d32; } .bad { color: #c62828; } .muted { opacity: .7; }
+    label { display: flex; align-items: center; gap: 6px; margin: 6px 0; }
+    label.col { flex-direction: column; align-items: stretch; gap: 2px; }
+    input[type=email], input[type=number] { padding: 4px; }
+    input[type=number] { width: 5em; }
+    .row { display: flex; gap: 6px; margin-top: 10px; }
+    button { padding: 4px 10px; }
+    .hint { font-size: 11px; opacity: .75; margin: 0 0 6px 22px; }
+  </style>
+</head>
+<body>
+  <h1>ILIAS Unibe – Stay Signed In</h1>
+  <div class="status" id="status">…</div>
+
+  <label><input type="checkbox" id="enabled"> Enabled</label>
+  <label>Keep-alive ping every <input type="number" id="keepAliveMinutes" min="1" max="60"> min</label>
+  <label><input type="checkbox" id="autoLogin"> Log in automatically via edu-ID</label>
+  <label><input type="checkbox" id="silentRelogin"> Re-login in a background tab if the session drops</label>
+  <p class="hint">Only while an ILIAS tab is open. The tab closes itself when done.</p>
+  <label class="col">edu-ID e-mail (optional if Firefox autofills it)
+    <input type="email" id="email" placeholder="you@students.unibe.ch">
+  </label>
+  <p class="hint" style="margin-left:0">Your password is never stored by this extension. Save it in Firefox's password manager for unibe.login.eduid.ch.</p>
+
+  <div class="row">
+    <button id="pingNow">Check now</button>
+    <button id="loginNow">Log in now</button>
+  </div>
+
+  <script src="common.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

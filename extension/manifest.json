@@ -1,0 +1,67 @@
+{
+  "manifest_version": 3,
+  "name": "ILIAS Unibe Stay Signed In",
+  "version": "1.0.0",
+  "description": "Keeps you signed in on ilias.unibe.ch (Switch edu-ID): keep-alive pings plus automatic re-login.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "ilias-unibe-stay-signed-in@lionel.local",
+      "strict_min_version": "115.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    }
+  },
+  "icons": {
+    "48": "icons/icon.svg",
+    "96": "icons/icon.svg"
+  },
+  "permissions": [
+    "storage",
+    "alarms",
+    "cookies",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "https://ilias.unibe.ch/*",
+    "https://*.eduid.ch/*"
+  ],
+  "background": {
+    "scripts": [
+      "common.js",
+      "background.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://ilias.unibe.ch/*"
+      ],
+      "js": [
+        "common.js",
+        "content/ilias.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://*.login.eduid.ch/*"
+      ],
+      "js": [
+        "common.js",
+        "content/eduid.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "ILIAS Stay Signed In",
+    "default_popup": "options.html",
+    "default_icon": "icons/icon.svg"
+  },
+  "options_ui": {
+    "page": "options.html"
+  }
+}
