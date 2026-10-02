@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""Sign the extension as an unlisted add-on on addons.mozilla.org (AMO).
+"""Sign the extension as an unlisted add-on on addons.mozilla.org (AMO) and
+publish it as a GitHub release that installed copies auto-update from.
 
 Usage:
-    AMO_JWT_ISSUER=user:123:456 AMO_JWT_SECRET=... ./sign.py
+    AMO_JWT_ISSUER=user:123:456 AMO_JWT_SECRET=... ./sign.py [--no-publish]
 
 Get the key/secret at https://addons.mozilla.org/developers/addon/api/key/
-The signed .xpi is written to dist/. Each upload needs a new "version" in
-extension/manifest.json.
+Each run needs a new "version" in extension/manifest.json. Steps:
+  1. upload to AMO, wait for signing, save dist/ilias-stay-signed-in-<version>.xpi
+  2. add the version to updates.json, commit, push  (skipped with --no-publish)
+  3. create GitHub release v<version> with the .xpi   (skipped with --no-publish)
 """
 
 import base64
@@ -25,6 +28,8 @@ API = "https://addons.mozilla.org/api/v5/addons"
 ROOT = os.path.dirname(os.path.abspath(__file__))
 ZIP = os.path.join(ROOT, "ilias-stay-signed-in.zip")
 DIST = os.path.join(ROOT, "dist")
+UPDATES = os.path.join(ROOT, "updates.json")
+REPO = "lionelsemion/ilias-auto-login"
 
 
 def b64url(data):
@@ -131,7 +136,49 @@ def main():
     out = os.path.join(DIST, f"ilias-stay-signed-in-{version}.xpi")
     with open(out, "wb") as f:
         f.write(amo.request("GET", ver["file"]["url"], raw=True))
-    print(f"Signed: {out}\nInstall it by dragging the file into Firefox, or via about:addons → ⚙ → Install Add-on From File.")
+    print(f"Signed: {out}")
+
+    if "--no-publish" in sys.argv:
+        print("Not publishing (--no-publish).")
+        return
+    publish(guid, version, out, manifest)
+
+
+def git(*args):
+    subprocess.run(["git", "-C", ROOT, *args], check=True)
+
+
+def publish(guid, version, xpi, manifest):
+    """Add the version to updates.json, push it, and attach the .xpi to a GitHub release."""
+    tag = f"v{version}"
+    asset = os.path.basename(xpi)
+    with open(xpi, "rb") as f:
+        sha256 = hashlib.sha256(f.read()).hexdigest()
+
+    with open(UPDATES) as f:
+        updates = json.load(f)
+    entries = updates["addons"][guid]["updates"]
+    entries[:] = [e for e in entries if e["version"] != version]
+    entries.append({
+        "version": version,
+        "update_link": f"https://github.com/{REPO}/releases/download/{tag}/{asset}",
+        "update_hash": f"sha256:{sha256}",
+        "browser_specific_settings": {
+            "gecko": {"strict_min_version": manifest["browser_specific_settings"]["gecko"]["strict_min_version"]},
+        },
+    })
+    with open(UPDATES, "w") as f:
+        json.dump(updates, f, indent=2)
+        f.write("\n")
+
+    git("add", "updates.json", "extension/manifest.json")
+    git("commit", "-m", f"Release {tag}")
+    git("push")
+    subprocess.run(["gh", "release", "create", tag, xpi, "--repo", REPO,
+                    "--target", subprocess.check_output(["git", "-C", ROOT, "rev-parse", "HEAD"], text=True).strip(),
+                    "--title", tag, "--notes", f"Signed Firefox add-on. Install `{asset}` by opening it in Firefox; "
+                    "installed copies update automatically."], check=True)
+    print(f"Published {tag}: https://github.com/{REPO}/releases/tag/{tag}")
 
 
 if __name__ == "__main__":

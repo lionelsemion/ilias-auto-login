@@ -24,18 +24,21 @@ ILIAS's logout page asks you to close the browser to finish logging out. That st
 
 ## Install
 
-Release Firefox only installs add-ons signed by Mozilla. This one is signed as an **unlisted** add-on: Mozilla signs it automatically, usually within minutes, and it is not published on addons.mozilla.org.
+Download the latest `.xpi` from [Releases](https://github.com/lionelsemion/ilias-auto-login/releases/latest) and open it in Firefox (or `about:addons` → ⚙ → "Install Add-on From File…"). Firefox then updates it automatically.
 
-1. Log in at <https://addons.mozilla.org> (a Firefox account is enough) and create an API key at <https://addons.mozilla.org/developers/addon/api/key/>.
-2. Sign the extension:
+In `about:addons` → this extension → Permissions, make sure access to `ilias.unibe.ch` and `eduid.ch` is allowed.
+
+## Releasing a new version
+
+The add-on is signed by Mozilla as an **unlisted** add-on (not listed on addons.mozilla.org) and distributed from this repo. Installed copies read [`updates.json`](updates.json) through the manifest's `update_url` to find new versions.
+
+1. Get an API key at <https://addons.mozilla.org/developers/addon/api/key/>.
+2. Raise `"version"` in `extension/manifest.json`.
+3. Run:
    ```sh
    AMO_JWT_ISSUER='user:…' AMO_JWT_SECRET='…' ./sign.py
    ```
-   This builds the zip, uploads it, waits for validation and signing, and saves `dist/ilias-stay-signed-in-<version>.xpi`.
-3. Install the `.xpi` by dragging it into a Firefox window, or via `about:addons` → ⚙ → "Install Add-on From File…".
-4. In `about:addons` → this extension → Permissions, make sure access to `ilias.unibe.ch` and `eduid.ch` is allowed.
-
-**Updates:** raise `"version"` in `extension/manifest.json`, run `./sign.py` again, and install the new `.xpi` over the old one. Settings are kept.
+   It builds the zip, gets it signed by AMO, and saves `dist/ilias-stay-signed-in-<version>.xpi`. It then adds the version to `updates.json`, commits and pushes, and creates the GitHub release `v<version>` with the `.xpi` attached. Use `--no-publish` to only sign.
 
 **During development:** load `extension/manifest.json` from `about:debugging#/runtime/this-firefox` → "Load Temporary Add-on…". This lasts until Firefox restarts.
 
