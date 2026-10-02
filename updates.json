@@ -1,7 +1,18 @@
 {
   "addons": {
     "ilias-unibe-stay-signed-in@lionel.local": {
-      "updates": []
+      "updates": [
+        {
+          "version": "1.0.1",
+          "update_link": "https://github.com/lionelsemion/ilias-auto-login/releases/download/v1.0.1/ilias-stay-signed-in-1.0.1.xpi",
+          "update_hash": "sha256:f9032b8c0bab3553ce4a99acc9a3a0697a7b945394601ada23628b41dbe65ed7",
+          "browser_specific_settings": {
+            "gecko": {
+              "strict_min_version": "115.0"
+            }
+          }
+        }
+      ]
     }
   }
 }

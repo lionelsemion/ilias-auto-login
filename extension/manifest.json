@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ILIAS Unibe Stay Signed In",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Keeps you signed in on ilias.unibe.ch (Switch edu-ID): keep-alive pings plus automatic re-login.",
   "browser_specific_settings": {
     "gecko": {
